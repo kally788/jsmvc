@@ -38,7 +38,7 @@ API 文档
 
 工具
 =====
-框架提供了2个工具，用于打包项目和注释生成文档。打包工具并非是打包为本地APP，而是把项目的代码进行压缩并进行优化
+框架提供了2个工具，用于打包项目和注释生成。打包工具并非是打包为本地APP，而是把项目的代码进行压缩并进行优化
 
 * 打包工具：http://www.jsmvc.cn/JsmvcDocsBuilder
-* 文档生成：http://www.jsmvc.cn/JsmvcPackProject
+* 注释生成：http://www.jsmvc.cn/JsmvcPackProject
