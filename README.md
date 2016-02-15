@@ -34,7 +34,7 @@ JsMvc 概述
 
 API 文档
 ========
-* https://github.com/kally788/jsmvc/tree/master/docs
+* <https://github.com/kally788/jsmvc/tree/master/docs>
 
 工具
 =====
