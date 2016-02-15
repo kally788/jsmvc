@@ -1,0 +1,4 @@
+@charset "utf-8";
+.main{margin-left: 20px; font:26px "Arial"}
+.main H1{color: #080205;}
+.main span{color: #7f447a; cursor: pointer; text-decoration:underline;margin-left: 20px;}

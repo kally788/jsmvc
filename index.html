@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <META HTTP-EQUIV="pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+    <META HTTP-EQUIV="expires" CONTENT="0">
+    <META http-equiv="X-UA-Compatible" content="IE=edge" >
+    <title>JsMVC</title>
+    <style>body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;}</style>
+    <link rel="icon" href="images/jsmvc.ico" type="image/x-icon"/>
+    <!-- 导入框架启动文件 -->
+    <script type="text/javascript" src="$jsmvc$/run.js?v=1_0" charset="utf-8"></script>
+    <script>
+        //样式文件，并行加载
+        var css = [
+            "css/css.css"
+        ];
+        //脚本文件，二维数组内容为并行加载，一维数组内容为同步加载
+        var js = [[
+             //并行加载框架、外部库和您的项目代码
+            "$library$/jquery.js",
+            "$library$/json2.js",
+            "$library$/Utils.js",
+            "$jsmvc$/core/FacadeAbs.js",
+            "$jsmvc$/core/PageAbs.js",
+            "$jsmvc$/core/ModelAbs.js",
+            "$jsmvc$/core/ControAbs.js",
+            "js/constant/Cons.js",
+            "js/contro/ChangeView.js",
+            "js/model/vo/GreetVO.js",
+            "js/model/Data.js",
+            "js/model/Hi.js",
+            "js/page/HelloWorld.js",
+            "js/Facade.js"
+        ]];
+        //页面模版，并行加载
+        var html = [
+            "html/helloWorld.html"
+        ];
+        //扩展模块，并行加载
+        var ext = [
+            "ext/example_interior/package.js"
+        ];
+    </script>
+</head>
+<body onload="$jsmvc$.run.start(css, js, html, ext, new Date().getTime());"></body>
+</html>
