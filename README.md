@@ -19,6 +19,15 @@ JsMvc 概述
 2. 门户、电商类网站
 3. 网页游戏
 
+DEMO：
+=====
+### webapp 实例：
+在线演示：http://120.24.13.18/example/webapp
+
+手机扫描访问：
+
+<img src="http://120.24.13.18/example/webapp.png"/>
+
 教程
 =====
 
