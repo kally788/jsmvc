@@ -28,6 +28,8 @@ DEMO：
 
 <img src="http://120.24.13.18/example/webapp.png"/>
 
+源代码：<https://github.com/kally788/example_webapp>
+
 教程
 =====
 
