@@ -56,9 +56,21 @@ $jsmvc$.core.FacadeAbs = function (template, setBackHistory) {
     var historyIndex = -1;
     //当前是否正在执行前进后退
     var historyExec = false;
+    //打开页面时是否存在历史记录
+    var historyOld = false;
     //设置浏览器前进后退按钮事件，并根据事件切换页面
-    if(setBackHistory){
-        window.addEventListener('popstate', function (e) {
+    if(setBackHistory && history && history.pushState && history.replaceState){
+        if(history.length > 1){
+            //打开主页时如果已存在历史记录，加入一条新记录，并在addPageHistory处进行更新（原记录保持state为null）
+            //目的为了清理前进记录，因为页面刷新后historyList是不存在的
+            historyOld = true;
+            history.pushState(null, null, document.URL);
+        }
+        window.addEventListener("popstate", function (e) {
+            if(e.state == null && historyOld){
+                //当记录state是null时，继续后退一页（第一次进入页面的原记录）
+                history.back();
+            }
             if(typeof e.state != "number" || historyList[e.state] == undefined){
                 return;
             }
