@@ -611,7 +611,7 @@ window["$jsmvc$"] = {
                 }
                 //创建 facade 实例
                 if(typeof facade == "function"){
-                    window["$jsmvc$"].facade = facade.prototype = new $jsmvc$.core.FacadeAbs(loadRecord.html.name);
+                    window["$jsmvc$"].facade = facade.prototype = new $jsmvc$.core.FacadeAbs(loadRecord.html.name, self.setBackHistory);
                     facade = new facade();
                     facade.supers = {};
                     for(var i in window["$jsmvc$"].facade){
@@ -1020,5 +1020,13 @@ window["$jsmvc$"] = {
          * @value number
          */
         this.setIEVerLimit  = null;
+
+        /**
+         * @type attr
+         * @name setBackHistory
+         * @desc 如果设置为true，可以通过浏览器前进后退按钮来切换页面，默认为true
+         * @value boolean
+         */
+        this.setBackHistory = true;
     }
 }

@@ -35,7 +35,7 @@
  *     $jsmvc$.facade.sendBroadcast("TEST");//调用 Facade 超类的 sendBroadcast 方法来发送一个名称为 TEST 的广播
  * </code>
  */
-$jsmvc$.core.FacadeAbs = function (template) {
+$jsmvc$.core.FacadeAbs = function (template, setBackHistory) {
 
     var self = this;
     //模块容器
@@ -49,6 +49,31 @@ $jsmvc$.core.FacadeAbs = function (template) {
         "err1":"Can't find JS class # ",
         "err2":"Can't find HTML template # ",
         "err3":"Error:Loop extends # "
+    }
+    //页面访问历史记录
+    var historyList = [];
+    //页面访问位置，历史记录中的索引
+    var historyIndex = -1;
+    //当前是否正在执行前进后退
+    var historyExec = false;
+    //设置浏览器前进后退按钮事件，并根据事件切换页面
+    if(setBackHistory){
+        //history.back(0);
+        window.addEventListener('popstate', function (e) {
+            if(typeof e.state != "number" || historyList[e.state] == undefined){
+                return;
+            }
+            var hist = historyList[e.state];
+            var page = reqPage(hist.className);
+            if(typeof page.showPage == "function"){
+                historyExec = true;
+                if(hist.arg.length > 0){
+                    page.showPage.apply(page, hist.arg);
+                }else{
+                    page.showPage();
+                }
+            }
+        });
     }
 
     //创建继承链
@@ -177,10 +202,63 @@ $jsmvc$.core.FacadeAbs = function (template) {
         return false;
     }
 
+    //添加page显示记录，第一个参数必须是page类名字符串，arg是要传递的参数数组（arguments）
+    var addPageHistory = function(className, arg){
+        if(historyList[historyIndex] != undefined && historyList[historyIndex].className == className){
+            return;
+        }
+        historyList[++historyIndex] = {className:className,arg:arg};
+        historyList.splice(historyIndex+1, historyList.length);
+        //添加浏览器的历史访问记录
+        if(!history || !history.pushState || !history.replaceState){
+            return;
+        }
+        if(!historyExec){
+            //如果是由前进后退按钮执行的页面显示不会记录history
+            if(historyIndex > 0){
+                history.pushState(historyIndex, null, document.URL);
+            }else{
+                history.replaceState(historyIndex, null, document.URL);
+            }
+        }
+        historyExec = false;
+    }
+
+    //获取上一个显示的page类名和需要传递的参数数组
+    var prevPage = function(){
+        if(!prevPageActive()){
+            return undefined;
+        }
+        return historyList[--historyIndex];
+    }
+
+    //获取下一个显示的page类名和需要传递的参数数组
+    var nextPage = function(){
+        if(!nextPageActive()){
+            return undefined;
+        }
+        return historyList[++historyIndex];
+    }
+
+    //判断是否有存在返回上一页
+    var prevPageActive = function(){
+        return historyIndex > 0;
+    }
+
+    //判断是否有存在前进下一页
+    var nextPageActive = function(){
+        return historyIndex < historyList.length - 1;
+    }
+
     //给PAGE抽象类添加顶级函数
     $jsmvc$.core.PageAbs.prototype.getTemplate = getTemplate;
     $jsmvc$.core.PageAbs.prototype.attachNotice = attachNotice;
     $jsmvc$.core.PageAbs.prototype.removeNotice = removeNotice;
+    $jsmvc$.core.PageAbs.prototype.addPageHistory = addPageHistory;
+    $jsmvc$.core.PageAbs.prototype.prevPage = prevPage;
+    $jsmvc$.core.PageAbs.prototype.nextPage = nextPage;
+    $jsmvc$.core.PageAbs.prototype.prevPageActive = prevPageActive;
+    $jsmvc$.core.PageAbs.prototype.nextPageActive = nextPageActive;
 
     //发布广播
     var sendBroadcast = function(evtName, data){

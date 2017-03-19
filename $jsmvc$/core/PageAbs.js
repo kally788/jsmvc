@@ -115,6 +115,17 @@ $jsmvc$.core.PageAbs = function (className) {
         }
     }
 
+    //添加页面访问记录，继承FacadeAbs于的方法
+    var addPageHistory = this.addPageHistory;
+    this.addPageHistory = undefined;
+
+    //取得上一个页面访问记录，继承FacadeAbs于的方法
+    var prevPage = this.prevPage;
+    this.prevPage = undefined;
+
+    //取得下一个页面访问记录，继承FacadeAbs于的方法
+    var nextPage = this.nextPage;
+    this.nextPage = undefined;
     //--------------------------------------------------------------------------------------------------
     //                  保护方法
     //--------------------------------------------------------------------------------------------------
@@ -415,6 +426,115 @@ $jsmvc$.core.PageAbs = function (className) {
 
     /**
      * @type function
+     * @name showHistory
+     * @modification pro
+     * @desc 当page重写showPage函数但又不需要调用父函数supers.showPage的情况下，需要调用本函数来记录页面访问记录，否则无法实现页面前进后退的功能。
+     * @param arguments:array 任意长度的参数，调用showPage时会原样返回
+     * @example
+     * 重写showPage中调用showHistory来记录页面，如果调用了supers.showPage就无需调用showHistory
+     * <code>
+     * js.page.HelloWorld = function () {
+     *      //父类保护函数集合，调用父类保护函数时需要通过该引用来访问
+     *      var protected;
+     *      //模块被创建时的事件
+     *      this.onCreate = function(parent){
+     *          //保存父类保护函数集合到一个私有变量中
+     *          protected = parent;
+     *      }
+     *      this.showPage = function(){
+     *          //this.supers.showPage(); 使用自己的显示方式，不调用父类的showPage
+     *          protected.showHistory();
+     *          //您的页面显示业务
+     *      }
+     * };
+     * </code>
+     */
+    var showHistory = function(){
+        addPageHistory(className, arguments);
+    };
+
+    /**
+     * @type function
+     * @name showPrevPage
+     * @modification pro
+     * @desc 显示上一个页面，如果没有时，不会有任何变化。
+     * @example
+     * 点击某个按钮后，返回到上一个页面，类似点击浏览器上的后退按钮
+     * <code>
+     * js.page.HelloWorld = function () {
+     *      //父类保护函数集合，调用父类保护函数时需要通过该引用来访问
+     *      var protected;
+     *      //模块被创建时的事件
+     *      this.onCreate = function(parent){
+     *          //保存父类保护函数集合到一个私有变量中
+     *          protected = parent;
+     *      }
+     *      this.showPage = function(){
+     *          this.supers.showPage();
+     *          //backbtn为您页面上的某个按钮
+     *          backbtn.on("click",function(){
+     *              protected.showPrevPage();
+     *          });
+     *      }
+     * };
+     * </code>
+     */
+    var showPrevPage = function(){
+        var prev = prevPage();
+        if(prev != undefined){
+            var page = $jsmvc$.facade.reqPage(prev.className);
+            if(typeof page.showPage == "function"){
+                if(prev.arg.length > 0){
+                    page.showPage.apply(page, prev.arg);
+                }else{
+                    page.showPage();
+                }
+            }
+        }
+    }
+
+    /**
+     * @type function
+     * @name showNextPage
+     * @modification pro
+     * @desc 显示下一个页面，如果没有时，不会有任何变化。
+     * @example
+     * 点击某个按钮后，前进到下一个页面，类似点击浏览器上的前进按钮。通常，只有在调用了后退到上一页时，才可能前进到下一页，可参考浏览器的前进后退按钮。
+     * <code>
+     * js.page.HelloWorld = function () {
+     *      //父类保护函数集合，调用父类保护函数时需要通过该引用来访问
+     *      var protected;
+     *      //模块被创建时的事件
+     *      this.onCreate = function(parent){
+     *          //保存父类保护函数集合到一个私有变量中
+     *          protected = parent;
+     *      }
+     *      this.showPage = function(){
+     *          this.supers.showPage();
+     *          //nextbtn为您页面上的某个按钮
+     *          nextbtn.on("click",function(){
+     *              protected.showNextPage();
+     *          });
+     *      }
+     * };
+     * </code>
+     */
+    var showNextPage = function(){
+        var next = nextPage();
+        if(next != undefined){
+            var page = $jsmvc$.facade.reqPage(next.className);
+            if(typeof page.showPage == "function"){
+                if(next.arg.length > 0){
+                    page.showPage.apply(page, next.arg);
+                }else{
+                    page.showPage();
+                }
+            }
+        }
+    }
+
+    /**
+     * @type function
      * @name getTemplate
      * @modification pro
      * @desc 获取 HTML 模版。getTemplate 是一个保护函数，无法通过 this 或者外部访问，请参考例子中的方式访问
@@ -515,6 +635,68 @@ $jsmvc$.core.PageAbs = function (className) {
     var removeNotice = this.removeNotice;
     this.removeNotice = undefined;
 
+    /**
+     * @type function
+     * @name prevPageActive
+     * @modification pro
+     * @desc 判断页面是否可以后退
+     * @returns boolean true是表示可以后退
+     * @example
+     * 在showPage中检测页面是否可以后退，以此来确定是否要显示后退按钮到top栏
+     * <code>
+     * js.page.HelloWorld = function () {
+     *      //父类保护函数集合，调用父类保护函数时需要通过该引用来访问
+     *      var protected;
+     *      //模块被创建时的事件
+     *      this.onCreate = function(parent){
+     *          //保存父类保护函数集合到一个私有变量中
+     *          protected = parent;
+     *      }
+     *      this.showPage = function(){
+     *          this.supers.showPage();
+     *          if(protected.prevPageActive()){
+     *              //显示后退按钮
+     *          }else{
+     *              //隐藏后退按钮
+     *          }
+     *      }
+     * };
+     * </code>
+     */
+    var prevPageActive = this.prevPageActive;
+    this.prevPageActive = undefined;
+
+    /**
+     * @type function
+     * @name nextPageActive
+     * @modification pro
+     * @desc 判断页面是否可以前进
+     * @returns boolean true是表示可以前进
+     * @example
+     * 在showPage中检测页面是否可以前进，以此来确定是否要显示前进按钮到top栏
+     * <code>
+     * js.page.HelloWorld = function () {
+     *      //父类保护函数集合，调用父类保护函数时需要通过该引用来访问
+     *      var protected;
+     *      //模块被创建时的事件
+     *      this.onCreate = function(parent){
+     *          //保存父类保护函数集合到一个私有变量中
+     *          protected = parent;
+     *      }
+     *      this.showPage = function(){
+     *          this.supers.showPage();
+     *          if(protected.nextPageActive()){
+     *              //显示前进按钮
+     *          }else{
+     *              //隐藏前进按钮
+     *          }
+     *      }
+     * };
+     * </code>
+     */
+    var nextPageActive = this.nextPageActive;
+    this.nextPageActive = undefined;
+
     //--------------------------------------------------------------------------------------------------
     //                  公共方法
     //--------------------------------------------------------------------------------------------------
@@ -523,6 +705,7 @@ $jsmvc$.core.PageAbs = function (className) {
      * @type function
      * @name showPage
      * @desc 把显示对象添加到舞台上（舞台原有的所有元素会被移除），调用该函数前确保已经添加了舞台和显示对象
+     * @param arguments:array 您重写showPage时，如果有参数，那么在调用supers.showPage时需要把参数往上传递
      * @returns boolean 成功或者失败
      * @example
      * 创建一个名称为 HelloWorld 的 page 类
@@ -575,6 +758,7 @@ $jsmvc$.core.PageAbs = function (className) {
                 stage.appendChild(display);
             }
         }
+        showHistory.apply(self, arguments);
         return true;
     };
 
@@ -667,9 +851,14 @@ $jsmvc$.core.PageAbs = function (className) {
             setDisplay:setDisplay,
             getDisplay:getDisplay,
             delDisplay:delDisplay,
+            showHistory:showHistory,
+            showPrevPage:showPrevPage,
+            showNextPage:showNextPage,
             getTemplate:getTemplate,
             attachNotice:attachNotice,
-            removeNotice:removeNotice
+            removeNotice:removeNotice,
+            prevPageActive:prevPageActive,
+            nextPageActive:nextPageActive
         };
     };
 
