@@ -22,11 +22,11 @@ JsMvc 概述
 DEMO：
 =====
 ### webapp 实例：
-在线演示：http://120.24.13.18/example/webapp
+在线演示：http://jsmvc.cn/example/webapp
 
 手机扫描访问：
 
-<img src="http://120.24.13.18/example/webapp.png"/>
+<img src="http://jsmvc.cn/example/webapp.png"/>
 
 源代码：<https://github.com/kally788/example_webapp>
 
@@ -45,7 +45,7 @@ DEMO：
 
 API 文档
 ========
-* <http://120.24.13.18/api>
+* <http://jsmvc.cn/api>
 
 工具
 =====
