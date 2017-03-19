@@ -154,9 +154,6 @@ window["$jsmvc$"] = {
             document.body.innerHTML = "<div style='background-color: #fcfbed; position:absolute;width: 100%;height: 100%;text-align: center;'>"+body+"</div>";
             if(!timeIng){
                 timeIng = setInterval(function() {
-                    if(ingIndex > 3){
-                        ingIndex = 0;
-                    }
                     var ingSpan = document.getElementById("ing");
                     if(ingSpan){
                         ingSpan.innerHTML = ing[ingIndex];
@@ -165,6 +162,9 @@ window["$jsmvc$"] = {
                         timeIng = null;
                     }
                     ingIndex ++;
+                    if(ingIndex > 3){
+                        ingIndex = 0;
+                    }
                 }, 100);
             }
         }
