@@ -58,7 +58,6 @@ $jsmvc$.core.FacadeAbs = function (template, setBackHistory) {
     var historyExec = false;
     //设置浏览器前进后退按钮事件，并根据事件切换页面
     if(setBackHistory){
-        //history.back(0);
         window.addEventListener('popstate', function (e) {
             if(typeof e.state != "number" || historyList[e.state] == undefined){
                 return;
@@ -210,7 +209,7 @@ $jsmvc$.core.FacadeAbs = function (template, setBackHistory) {
         historyList[++historyIndex] = {className:className,arg:arg};
         historyList.splice(historyIndex+1, historyList.length);
         //添加浏览器的历史访问记录
-        if(!history || !history.pushState || !history.replaceState){
+        if(!setBackHistory || !history || !history.pushState || !history.replaceState){
             return;
         }
         if(!historyExec){
