@@ -74,6 +74,10 @@ $jsmvc$.core.FacadeAbs = function (template, setBackHistory) {
             if(typeof e.state != "number" || historyList[e.state] == undefined){
                 return;
             }
+            if(Math.abs(historyIndex - e.state) != 1){
+                //当使用框架的前进后退功能时，会导致与浏览器的前进后退按钮索引不一致。暂无解决方案
+            }
+            historyIndex = e.state;//同步historyIndex索引值，以确保使用浏览器的前进后退按钮后与框架的前进后退按钮同步
             var hist = historyList[e.state];
             var page = reqPage(hist.className);
             if(typeof page.showPage == "function"){
