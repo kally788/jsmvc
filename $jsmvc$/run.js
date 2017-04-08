@@ -143,14 +143,14 @@ window["$jsmvc$"] = {
             var ok = "";
             var no = "";
             for(var i=0;i<num;i++){
-                ok += "■";
+                ok += "━";
             }
             for(var i=0;i<10-num;i++){
-                no += "■";
+                no += "━";
             }
-            var gif = "<div style='font:26px \"Arial\'><span style='color: #1c1c1c;'>"+ok+"</span><span style='color: #7f8171;'>"+no+"</span></div>";
-            var txt = "<div style='font:18px/25px \"Arial\";color: #7b755a;' id='msg'><span>loading</span><span id='ing'>"+ing[ingIndex]+"</span>"+(num*10)+"%</div>";
-            var body = "<div style='height:50px; width:160px;top:50%;left:50%;position:absolute;margin:-25px 0 0 -80px;'>"+gif+txt+"</div>";
+            var gif = "<div style='font:18px/26px \"Arial\'><span style='color: #1c1c1c;'>"+ok+"</span><span style='color: #7f8171;'>"+no+"</span></div>";
+            var txt = "<div style='font:18px/26px \"Arial\";color: #7b755a;' id='msg'><span>loading</span><span id='ing'>"+ing[ingIndex]+"</span>"+(num*10)+"%</div>";
+            var body = "<div style='height:50px; width:180px;top:50%;left:50%;position:absolute;margin:-25px 0 0 -90px;'>"+gif+txt+"</div>";
             document.body.innerHTML = "<div style='background-color: #fcfbed; position:absolute;width: 100%;height: 100%;text-align: center;'>"+body+"</div>";
             if(!timeIng){
                 timeIng = setInterval(function() {
