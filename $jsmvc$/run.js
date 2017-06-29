@@ -585,6 +585,55 @@ window["$jsmvc$"] = {
                 alert(errMsg.err4);
                 throw errMsg.err4;
             }
+
+            /**在IE8及以下，如果数组是[A,B,C,]这样，其length为4，IE9及以上和其它浏览器为3**/
+            /**此处为自动过滤掉无效的加载项**/
+            if(isIE && ieVer < 9){
+                if(css){
+                    var cssTMP = css;
+                    css = [];
+                    for(var i=0;i<cssTMP.length;i++){
+                        if(cssTMP[i]){
+                            css.push(cssTMP[i]);
+                        }
+                    }
+                }
+                if(html){
+                    var htmlTMP = html;
+                    html = [];
+                    for(var i=0;i<htmlTMP.length;i++){
+                        if(htmlTMP[i]){
+                            html.push(htmlTMP[i]);
+                        }
+                    }
+                }
+                if(ext){
+                    var extTMP = ext;
+                    ext = [];
+                    for(var i=0;i<extTMP.length;i++){
+                        if(extTMP[i]){
+                            ext.push(extTMP[i]);
+                        }
+                    }
+                }
+                if(js){
+                    var jsTMP = js;
+                    js = [];
+                    for(var i=0;i<jsTMP.length;i++){
+                        var jsTMP_TOW = jsTMP[i];
+                        if(jsTMP_TOW && (typeof jsTMP_TOW == "object")){
+                            var jsTOW = [];
+                            for(var j=0;j<jsTMP_TOW.length;j++){
+                                if(jsTMP_TOW[j]){
+                                    jsTOW.push(jsTMP_TOW[j]);
+                                }
+                            }
+                            js.push(jsTOW);
+                        }
+                    }
+                }
+            }
+
             oHead = document.getElementsByTagName('HEAD');
             if(oHead){
                 oHead = oHead.item(0);
