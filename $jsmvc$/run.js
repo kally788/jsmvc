@@ -267,39 +267,31 @@ window["$jsmvc$"] = {
             var oScript = document.createElement("script");
             oScript.type = "text/javascript";
             oScript.charset = "utf-8";
+            oScript.src = (url.indexOf("?") == -1) ? (url + "?ver=" + ver) : url;
+            oHead.appendChild(oScript);
+            var funcEvent = function(status){
+                oScript.onload = oScript.onerror = null;
+                if(status) loadRecord.js[url] = true;
+                if(cb && typeof cb == "function") cb(status, route);
+                oHead.removeChild(oScript);
+            }
+            oScript.onerror = function(){
+                funcEvent(false);
+            };
+            oScript.onload = function(){
+                funcEvent(true);
+            };
+            /**去除旧版本IE8及以下使用ActiveXObject加载方式，因为此方式会出现无法加载跨域JS**/
+            /**通过添加onreadystatechange事件来触发加载完成，但无法判断加载失败的情况**/
+            /**在IE8及以下如果JS地址错误时无法知道。但不影响正常运行**/
             if(isIE && ieVer < 9){
-                //处理 script 标签 onload|onerror 事件兼容性问题（IE6-8无onerror事件，所以采用ActiveXObject的方式来加载）
-                var request = getRequest();
-                request.open("GET",(url.indexOf("?") == -1) ? (url + "?ver=" + ver) : url) ;
-                request.onreadystatechange = function() {
-                    if(request.readyState == 4) {
-                        if(request.status == 200 || request.status == 0){
-                            oScript.text = request.responseText;
-                            oHead.appendChild(oScript);
-                            loadRecord.js[url] = true;
-                            if(cb && typeof cb == "function") cb(true, route);
-                            oHead.removeChild(oScript);
-                        }else{
-                            if(cb && typeof cb == "function") cb(false, route);
-                        }
+                oScript.onreadystatechange = function() {
+                    var r = oScript.readyState;
+                    if (r === 'loaded' || r === 'complete') {
+                        oScript.onreadystatechange = null;
+                        funcEvent(true);
                     }
-                };
-                request.send();
-            }else{
-                oScript.src = (url.indexOf("?") == -1) ? (url + "?ver=" + ver) : url;
-                oHead.appendChild(oScript);
-                var funcEvent = function(status){
-                    oScript.onload = oScript.onerror = null;
-                    if(status) loadRecord.js[url] = true;
-                    if(cb && typeof cb == "function") cb(status, route);
-                    oHead.removeChild(oScript);
                 }
-                oScript.onerror = function(){
-                    funcEvent(false);
-                }
-                oScript.onload = function(){
-                    funcEvent(true);
-                };
             }
         }
 
@@ -339,7 +331,10 @@ window["$jsmvc$"] = {
                     if(oCss[sheet][cssRules].length){
                         funcEvent(true);
                     }else{
-                        funcEvent(false);
+                        /**在IE8及以下由于会存在CSS外壳已加载完毕但内容为空的情况**/
+                        /**此时，定时器执行后会导致cssRules的length为0而出现错误**/
+                        /**注释funcEvent(false)后，在IE8及以下如果CSS地址错误时无法知道。但不影响正常运行**/
+                        //funcEvent(false);
                     }
                 }
             }
@@ -372,17 +367,37 @@ window["$jsmvc$"] = {
                             templateName += (templateName==""?"":".")+templatePath[i];
                         }
                         //分析模版文件
-                        var node = document.createElement("jsmvc");
-                        node.setAttribute("id", templateName);
-                        node.innerHTML = request.responseText;
-                        var childList = node.getElementsByTagName("jsmvc");
-                        if(childList.length){
-                            for(var j = 0; j < childList.length; j++){
-                                var child = childList[j];
-                                loadRecord.html.url[url] = loadRecord.html.name[child.getAttribute("id")] = child.innerHTML;
+                        if(isIE && ieVer < 9){
+                            /**解决在IE8级以下无法自定义HTML标签的BUG，打包工具会插入名为jsmvc的自定义标签**/
+                            if(!!request.responseText.match(/<jsmvc id=.*<\/jsmvc>/)){
+                                var tmpName = new Date().getTime()+"-"+Math.random();
+                                var node = document.createElement("code");
+                                node.setAttribute("id", templateName);
+                                var str = request.responseText.replace(new RegExp("<jsmvc id=","g"), '<code name="'+tmpName+'" id=');
+                                node.innerHTML = str.replace(new RegExp("</jsmvc>","g"), '</code>');
+                                var childList = node.getElementsByTagName("code");
+                                for(var j = 0; childList && j < childList.length; j++){
+                                    var child = childList[j];
+                                    if(child.getAttribute("name") == tmpName){
+                                        loadRecord.html.url[url] = loadRecord.html.name[child.getAttribute("id")] = child.innerHTML;
+                                    }
+                                }
+                            }else{
+                                loadRecord.html.url[url] = loadRecord.html.name[templateName] = request.responseText;
                             }
                         }else{
-                            loadRecord.html.url[url] = loadRecord.html.name[templateName] = request.responseText;
+                            var node = document.createElement("jsmvc");
+                            node.setAttribute("id", templateName);
+                            node.innerHTML = request.responseText;
+                            var childList = node.getElementsByTagName("jsmvc");
+                            if(childList.length){
+                                for(var j = 0; j < childList.length; j++){
+                                    var child = childList[j];
+                                    loadRecord.html.url[url] = loadRecord.html.name[child.getAttribute("id")] = child.innerHTML;
+                                }
+                            }else{
+                                loadRecord.html.url[url] = loadRecord.html.name[templateName] = request.responseText;
+                            }
                         }
                         if(cb && typeof cb == "function") cb(true);
                     }else{
@@ -819,7 +834,7 @@ window["$jsmvc$"] = {
          * @name includeJS
          * @desc 异步加载JS。通常情况下，无需使用该方法。JS 应在调用 start 时进行加载
          * @param url:string JS地址。已经加载过了直接返回成功
-         * @param cb:function 加载完毕回调方法，回调方法包含2个参数：
+         * @param cb:function 加载完毕回调方法（在IE8及以下如果加载失败无法触发回调，需要自己增加定时器来处理），回调方法包含2个参数：
          * 1.加载状态 boolean
          * 2.JS命名空间 { package:包, className:类名 }
          * @example
@@ -843,7 +858,7 @@ window["$jsmvc$"] = {
          * @name includeCSS
          * @desc 异步加载CSS。CSS文件不能是空内容。通常情况下，无需使用该方法。CSS 应在调用 start 时进行加载
          * @param url:string CSS地址
-         * @param cb:function 加载完毕回调方法，回调方法包含1个 boolean 参数，表示是否加载成功
+         * @param cb:function 加载完毕回调方法，回调方法包含1个 boolean 参数，表示是否加载成功（在IE8及以下如果加载失败无法触发回调，需要自己增加定时器来处理）
          * @example
          * <code>
          * $jsmvc$.run.includeCSS("http://example.com/x.css", function(s){
