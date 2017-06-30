@@ -59,14 +59,18 @@
  * &lt;body onload="$jsmvc$.run.start(css, js, html, ext, new Date().getTime());"&gt;&lt;/body&gt;
  * </code>
  */
+
 if(window["$jsmvc$"]){
     var err = "'$jsmvc$' namespace conflict or <jsmvc> already load!";
     alert(err);
     throw err;
 }
-window["$jsmvc$"] = {
-    run:new function () {
 
+//在IE8及以下，通过window["xx"]定义的变量，如果在其它脚本中重新定义var xx;后，会导致undefined。
+//（因为打包工具自动创建命名空间时会存在重新定义的情况）
+//所以，此处由原来的window["$jsmvc$"]定义方式修改为var $jsmvc$的方式。
+var $jsmvc$ = {
+    run:new function () {
         //加载资源的版本号，可在调用start时重新指定
         var ver = "0_0_0";
         //HEAD标签，用于加载CSS和JS文件的
@@ -281,9 +285,9 @@ window["$jsmvc$"] = {
             oScript.onload = function(){
                 funcEvent(true);
             };
-            /**去除旧版本IE8及以下使用ActiveXObject加载方式，因为此方式会出现无法加载跨域JS**/
-            /**通过添加onreadystatechange事件来触发加载完成，但无法判断加载失败的情况**/
-            /**在IE8及以下如果JS地址错误时无法知道。但不影响正常运行**/
+            //去除旧版本IE8及以下使用ActiveXObject加载方式，因为此方式会出现无法加载跨域JS
+            //通过添加onreadystatechange事件来触发加载完成，但无法判断加载失败的情况
+            //在IE8及以下如果JS地址错误时无法知道。但不影响正常运行
             if(isIE && ieVer < 9){
                 oScript.onreadystatechange = function() {
                     var r = oScript.readyState;
@@ -331,9 +335,9 @@ window["$jsmvc$"] = {
                     if(oCss[sheet][cssRules].length){
                         funcEvent(true);
                     }else{
-                        /**在IE8及以下由于会存在CSS外壳已加载完毕但内容为空的情况**/
-                        /**此时，定时器执行后会导致cssRules的length为0而出现错误**/
-                        /**注释funcEvent(false)后，在IE8及以下如果CSS地址错误时无法知道。但不影响正常运行**/
+                        //在IE8及以下由于会存在CSS外壳已加载完毕但内容为空的情况
+                        //此时，定时器执行后会导致cssRules的length为0而出现错误
+                        //注释funcEvent(false)后，在IE8及以下如果CSS地址错误时无法知道。但不影响正常运行
                         //funcEvent(false);
                     }
                 }
@@ -368,7 +372,7 @@ window["$jsmvc$"] = {
                         }
                         //分析模版文件
                         if(isIE && ieVer < 9){
-                            /**解决在IE8级以下无法自定义HTML标签的BUG，打包工具会插入名为jsmvc的自定义标签**/
+                            //解决在IE8级以下无法自定义HTML标签的BUG，打包工具会插入名为jsmvc的自定义标签
                             if(!!request.responseText.match(/<jsmvc id=.*<\/jsmvc>/)){
                                 var tmpName = new Date().getTime()+"-"+Math.random();
                                 var node = document.createElement("code");
@@ -586,8 +590,8 @@ window["$jsmvc$"] = {
                 throw errMsg.err4;
             }
 
-            /**在IE8及以下，如果数组是[A,B,C,]这样，其length为4，IE9及以上和其它浏览器为3**/
-            /**此处为自动过滤掉无效的加载项**/
+            //在IE8及以下，如果数组是[A,B,C,]这样，其length为4，IE9及以上和其它浏览器为3
+            //此处为自动过滤掉无效的加载项
             if(isIE && ieVer < 9){
                 if(css){
                     var cssTMP = css;
